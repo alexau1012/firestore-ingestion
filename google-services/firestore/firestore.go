@@ -2,10 +2,14 @@ package googleservices
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"log"
 
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
+	"github.com/alexau1012/firestore-data-ingestion/domain"
+	"google.golang.org/api/iterator"
 )
 
 func InitFirestore() (*firestore.Client, context.Context) {
@@ -23,4 +27,79 @@ func InitFirestore() (*firestore.Client, context.Context) {
 	}
 
 	return client, ctx
+}
+
+func ReadCollection(ctx context.Context, client *firestore.Client, collectionName string, printDocuments bool) error {
+	docs := client.Collection(collectionName).Documents(ctx)
+	count := 0
+	for {
+		doc, err := docs.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		if printDocuments {
+			dsnap := doc.Data()
+			dsnapPretty, err := json.MarshalIndent(dsnap, "", "  ")
+			if err != nil {
+				return err
+			}
+			fmt.Print(string(dsnapPretty) + "\n")
+		}
+		count++
+	}
+	fmt.Printf("%v: Document count: %d\n", collectionName, count)
+	return nil
+}
+
+func DeleteCollection(ctx context.Context, client *firestore.Client, collectionName string, batchSize int) error {
+	col := client.Collection(collectionName)
+	bulkwriter := client.BulkWriter(ctx)
+
+	for {
+		// Get a batch of documents
+		iter := col.Limit(batchSize).Documents(ctx)
+		numDeleted := 0
+
+		// Iterate through the documents, adding
+		// a delete operation for each one to the BulkWriter.
+		for {
+			doc, err := iter.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return err
+			}
+
+			bulkwriter.Delete(doc.Ref)
+			numDeleted++
+		}
+
+		// If there are no documents to delete,
+		// the process is over.
+		if numDeleted == 0 {
+			bulkwriter.End()
+			break
+		}
+
+		bulkwriter.Flush()
+	}
+	fmt.Printf("Deleted collection \"%s\"", collectionName)
+	return nil
+}
+
+func SetDocument(ctx context.Context, client *firestore.Client, documentName string, value *domain.Recommendations) error {
+	fmt.Println(value)
+	_, err := client.Doc(documentName).Set(ctx, map[string]interface{}{
+		"recommendations": value.Recommendations,
+		"meta": map[string]interface{}{
+			"type": value.Meta.Type,
+			"ver":  value.Meta.Ver,
+		},
+	})
+	fmt.Printf("Set document \"%s\"\n", documentName)
+	return err
 }
