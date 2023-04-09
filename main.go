@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -10,9 +9,8 @@ import (
 	"os"
 	"time"
 
-	"cloud.google.com/go/firestore"
 	"github.com/alexau1012/firestore-data-ingestion/domain"
-	googleservices "github.com/alexau1012/firestore-data-ingestion/google-services/firestore"
+	firestoreDB "github.com/alexau1012/firestore-data-ingestion/firestore_db"
 )
 
 func main() {
@@ -21,7 +19,7 @@ func main() {
 	flag.Parse()
 	config := readConfigFile(*configFilePtr)
 
-	client, ctx := googleservices.InitFirestore()
+	db := firestoreDB.New()
 
 	for _, userId := range config.UserIds {
 		cref := fmt.Sprintf("users/%v/personalisedShowRecommendations", userId)
@@ -29,14 +27,14 @@ func main() {
 
 		var err error
 		if *usecasePtr == "RESET" {
-			err = resetUserRecommmendations(ctx, client, cref, userId)
+			err = resetUserRecommmendations(db, cref, userId)
 			if err != nil {
 				log.Fatalln(err)
 			}
 		}
 
 		if *usecasePtr == "READ_ONLY" {
-			err = readUserRecommendations(ctx, client, cref, false, userId)
+			err = readUserRecommendations(db, cref, false, userId)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -44,47 +42,42 @@ func main() {
 
 		if *usecasePtr == "READ_WRITE" {
 			fmt.Printf("Ingesting user <%v> recommendation ids...", userId)
-			err = readUserRecommendations(ctx, client, cref, false, userId)
+			err = readUserRecommendations(db, cref, false, userId)
 			if err != nil {
 				log.Fatalln(err)
 			}
-			err = writeUserRecommendationIds(ctx, client, dref,
+			err = writeUserRecommendationIds(db, dref,
 				&domain.Recommendations{Recommendations: config.Recommendations, Meta: config.Meta})
 			if err != nil {
 				log.Fatalln(err)
 			}
-			err = readUserRecommendations(ctx, client, cref, false, userId)
+
+			time.Sleep(5 * time.Second)
+
+			err = readUserRecommendations(db, cref, false, userId)
 			if err != nil {
 				log.Fatalln(err)
 			}
 		}
-
-		// Set recommendation ids
-		googleservices.SetDocument(ctx, client, dref, &domain.Recommendations{Meta: config.Meta, Recommendations: config.Recommendations})
-
-		time.Sleep(5 * time.Second)
-
-		fmt.Println("After Ingestion")
-		googleservices.ReadCollection(ctx, client, cref, false)
 	}
 
-	defer client.Close()
+	defer db.CloseConn()
 }
 
-func resetUserRecommmendations(ctx context.Context, client *firestore.Client, cref string, userId string) error {
+func resetUserRecommmendations(db firestoreDB.FirestoreDB, cref string, userId string) error {
 	fmt.Printf("Resetting user <%v> recommendations collection...", userId)
-	err := googleservices.DeleteCollection(ctx, client, cref, 20)
+	err := db.DeleteCollection(cref, 20)
 	return err
 }
 
-func readUserRecommendations(ctx context.Context, client *firestore.Client, cref string, printDocuments bool, userId string) error {
+func readUserRecommendations(db firestoreDB.FirestoreDB, cref string, printDocuments bool, userId string) error {
 	fmt.Printf("Reading user <%v> recommendations collection...", userId)
-	err := googleservices.ReadCollection(ctx, client, cref, false)
+	err := db.ReadCollection(cref, false)
 	return err
 }
 
-func writeUserRecommendationIds(ctx context.Context, client *firestore.Client, documentName string, value *domain.Recommendations) error {
-	err := googleservices.SetDocument(ctx, client, documentName, value)
+func writeUserRecommendationIds(db firestoreDB.FirestoreDB, documentName string, value *domain.Recommendations) error {
+	err := db.SetDocument(documentName, value)
 	return err
 }
 
