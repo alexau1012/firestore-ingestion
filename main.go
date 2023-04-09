@@ -29,30 +29,24 @@ func main() {
 		switch *usecasePtr {
 		case "RESET":
 			err = db.DeleteCollection(cref, 20)
-			if err != nil {
-				log.Fatalln(err)
-			}
 		case "READ_ONLY":
 			err = db.ReadCollection(cref, false)
-			if err != nil {
-				log.Fatalln(err)
-			}
 		case "READ_WRITE":
 			fmt.Printf("Ingesting user <%v> recommendation ids...", userId)
 			err = db.ReadCollection(cref, false)
 			if err != nil {
-				log.Fatalln(err)
+				break
 			}
 			err = db.SetDocument(dref,
 				&domain.Recommendations{Recommendations: config.Recommendations, Meta: config.Meta})
 			if err != nil {
-				log.Fatalln(err)
+				break
 			}
 			time.Sleep(3 * time.Second)
 			err = db.ReadCollection(cref, false)
-			if err != nil {
-				log.Fatalln(err)
-			}
+		}
+		if err != nil {
+			log.Fatalln(err)
 		}
 	}
 
