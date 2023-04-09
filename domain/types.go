@@ -6,8 +6,8 @@ type Meta struct {
 }
 
 type Recommendations struct {
-	Recommendations []string
-	Meta            Meta
+	Recommendations []string `json:"recommendations"`
+	Meta            Meta     `json:"meta"`
 }
 
 type Config struct {
