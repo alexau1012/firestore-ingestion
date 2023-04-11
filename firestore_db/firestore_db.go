@@ -13,8 +13,8 @@ import (
 )
 
 type FirestoreDB struct {
-	client *firestore.Client
-	ctx    context.Context
+	client    *firestore.Client
+	ctx       context.Context
 	batchSize int
 }
 
@@ -56,7 +56,7 @@ func (db FirestoreDB) ReadCollection(collectionName string, printDocuments bool)
 			if err != nil {
 				return err
 			}
-			fmt.Print(string(dsnapPretty) + "\n")
+			fmt.Println(string(dsnapPretty))
 		}
 		count++
 	}
@@ -101,9 +101,9 @@ func (db FirestoreDB) DeleteCollection(collectionName string) error {
 	return nil
 }
 
-func (db FirestoreDB) SetDocument(documentName string, value *domain.Recommendations) error {
+func (db FirestoreDB) SetDocument(documentName string, value *domain.Recommendations, key string) error {
 	_, err := db.client.Doc(documentName).Set(db.ctx, map[string]interface{}{
-		"recommendations": value.Recommendations,
+		key: value.Recommendations,
 		"meta": map[string]interface{}{
 			"type": value.Meta.Type,
 			"ver":  value.Meta.Ver,
