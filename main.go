@@ -28,8 +28,10 @@ func main() {
 		var err error
 		switch *usecasePtr {
 		case "RESET":
-			err = db.DeleteCollection(cref, 20)
+			fmt.Printf("Resetting user <%v> recommendations feed...", userId)
+			err = db.DeleteCollection(cref)
 		case "READ_ONLY":
+			fmt.Printf("Reading user <%v> recommendation ids...", userId)
 			err = db.ReadCollection(cref, false)
 		case "READ_WRITE":
 			fmt.Printf("Ingesting user <%v> recommendation ids...", userId)

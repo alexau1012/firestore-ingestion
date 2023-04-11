@@ -15,6 +15,7 @@ import (
 type FirestoreDB struct {
 	client *firestore.Client
 	ctx    context.Context
+	batchSize int
 }
 
 func New() FirestoreDB {
@@ -31,7 +32,7 @@ func New() FirestoreDB {
 		log.Fatalln(err)
 	}
 
-	return FirestoreDB{client: client, ctx: ctx}
+	return FirestoreDB{client: client, ctx: ctx, batchSize: 20}
 }
 
 func (db FirestoreDB) CloseConn() {
@@ -63,13 +64,13 @@ func (db FirestoreDB) ReadCollection(collectionName string, printDocuments bool)
 	return nil
 }
 
-func (db FirestoreDB) DeleteCollection(collectionName string, batchSize int) error {
+func (db FirestoreDB) DeleteCollection(collectionName string) error {
 	col := db.client.Collection(collectionName)
 	bulkwriter := db.client.BulkWriter(db.ctx)
 
 	for {
 		// Get a batch of documents
-		iter := col.Limit(batchSize).Documents(db.ctx)
+		iter := col.Limit(db.batchSize).Documents(db.ctx)
 		numDeleted := 0
 
 		// Iterate through the documents, adding
