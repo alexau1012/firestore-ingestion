@@ -1,23 +1,9 @@
 {
-  "userIds": [
-    "EvXay4UxYDXR7JcpqYmZza0icdl1",
-    "ur0wmOwsRQfFXTWtSkoGqZaYcFl1",
-    "boyxdN3og3Zy6R8mV09KUi9sTpO2",
-    "FlTwf45jzFgHxq5SvSqvedWiWi93",
-    "vMwSGnbNYRfJzjpQUf9LxFVLJyd2",
-    "gSyf2pR3YIcYcKSHnoHxI90tIvy2",
-    "p5cXKHhTzUSx7OUuhhWVjOtncxA2",
-    "OR4R6pBMLrSGtVFdrELKxOjjNk12",
-    "UFdOTOc4Hyg2IPsumYq0pPGnZlH3"
-  ],
+  "userIds": ["MenQPxlnynYc6kkfUmxxVn6Sxes1"],
   "recommendations": [
-    "e11b90e9-b620-4698-88ed-34101f535115",
-    "cb443a97-b807-45bd-b1aa-7faa2f37542c",
-    "386cfae8-2e5e-4ed6-bc81-de02a96369c2",
-    "95c80e2f-98ab-4c42-b84a-52909d43ba6f",
-    "1a635bc3-f2bc-4fb0-a283-1628170abf98",
-    "66d01a2d-a63e-49f3-a976-80f6b610408c",
-    "bab4ceaf-2f65-464a-996e-5ebacb22bc6b"
+    "8b026119-d040-4430-ac21-9f4ea003322e",
+    "fa38c7b8-db25-44ed-93af-17341860001e",
+    "7967f958-4fdc-46d5-ae8a-acd00165a40b"
   ],
   "meta": {
     "type": "3",

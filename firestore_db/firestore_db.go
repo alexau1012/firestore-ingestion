@@ -40,7 +40,12 @@ func (db FirestoreDB) CloseConn() {
 }
 
 func (db FirestoreDB) ReadCollection(collectionName string, printDocuments bool) error {
-	docs := db.client.Collection(collectionName).Documents(db.ctx)
+	collection := db.client.Collection(collectionName)
+	if collection == nil {
+		fmt.Println("Collection does not exist")
+		return nil
+	}
+	docs := collection.Documents(db.ctx)
 	count := 0
 	for {
 		doc, err := docs.Next()

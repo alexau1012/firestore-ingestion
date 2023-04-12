@@ -15,16 +15,17 @@ import (
 
 func main() {
 	configFilePtr := flag.String("config", "", "JSON file config")
-	usecasePtr := flag.String("usecase", "READ_ONLY", "Specify use case: READ_ONLY / READ_WRITE / RESET")
+	usecasePtr := flag.String("usecase", "WRITE", "Specify use case: READ / WRITE / RESET")
 	entityPtr := flag.String("entity", "shows", "shows / episodes")
 	verbosePtr := flag.Bool("verbose", false, "Full logs")
+
+	flag.Parse()
 
 	recommendationsKey := *entityPtr
 	if *entityPtr == "shows" {
 		recommendationsKey = "recommendations"
 	}
 
-	flag.Parse()
 	config := readConfigFile(*configFilePtr)
 
 	db := firestoreDB.New()
@@ -36,24 +37,24 @@ func main() {
 		switch *usecasePtr {
 		case "RESET":
 			fmt.Printf("Resetting user <%v> recommendations feed...\n", userId)
-			err = db.DeleteCollection(recommendationIdsPath)
+			err = db.DeleteCollection(userFeed)
 			fmt.Println()
-		case "READ_ONLY":
-			fmt.Printf("Reading user <%v> recommendation ids...\n", userId)
-			err = db.ReadCollection(recommendationIdsPath, *verbosePtr)
+		case "READ":
+			fmt.Printf("Reading user <%v> recommended feed...\n", userId)
+			err = db.ReadCollection(userFeed, *verbosePtr)
 			fmt.Println()
-		case "READ_WRITE":
+		case "WRITE":
 			fmt.Printf("Ingesting user <%v> recommendation ids...\n", userId)
-			err = db.ReadCollection(recommendationIdsPath, *verbosePtr)
+			err = db.ReadCollection(userFeed, *verbosePtr)
 			if err != nil {
 				break
 			}
-			err = db.SetDocument(userFeed,
+			err = db.SetDocument(recommendationIdsPath,
 				&domain.Recommendations{Recommendations: config.Recommendations, Meta: config.Meta}, recommendationsKey)
 			if err != nil {
 				break
 			}
-			time.Sleep(3 * time.Second)
+			time.Sleep(5 * time.Second)
 			err = db.ReadCollection(userFeed, *verbosePtr)
 			fmt.Println()
 		}
@@ -78,7 +79,7 @@ func getRefs(entity string, userId string) (cref string, dref string) {
 		userFeed = "users/%v/personalisedShowRecommendations"
 	}
 
-	return fmt.Sprintf(userFeed, userId), fmt.Sprintf(recommendationIdsPath, userId)
+	return fmt.Sprintf(recommendationIdsPath, userId), fmt.Sprintf(userFeed, userId)
 }
 
 func readConfigFile(configFileName string) domain.Config {
