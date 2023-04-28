@@ -21,7 +21,7 @@ type FirestoreDB struct {
 
 func New(projectId string) infrastructure.DocumentDatabase {
 	ctx := context.Background()
-	conf := &firebase.Config{ProjectID: "pcone-xl-fb-dev"}
+	conf := &firebase.Config{ProjectID: projectId}
 
 	app, err := firebase.NewApp(ctx, conf)
 	if err != nil {
