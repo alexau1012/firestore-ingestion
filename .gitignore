@@ -1,2 +1,3 @@
 *.json
 firestore-data-ingestion
+.env

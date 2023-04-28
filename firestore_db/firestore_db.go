@@ -19,7 +19,7 @@ type FirestoreDB struct {
 	batchSize int
 }
 
-func New() infrastructure.DocumentDatabase {
+func New(projectId string) infrastructure.DocumentDatabase {
 	ctx := context.Background()
 	conf := &firebase.Config{ProjectID: "pcone-xl-fb-dev"}
 

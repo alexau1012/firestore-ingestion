@@ -11,9 +11,15 @@ import (
 
 	"github.com/alexau1012/firestore-data-ingestion/domain"
 	firestoreDB "github.com/alexau1012/firestore-data-ingestion/firestore_db"
+	"github.com/joho/godotenv"
 )
 
 func main() {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	configFilePtr := flag.String("config", "", "JSON file config")
 	usecasePtr := flag.String("usecase", "WRITE", "Specify use case: READ / WRITE / RESET")
 	entityPtr := flag.String("entity", "shows", "shows / episodes")
@@ -28,7 +34,7 @@ func main() {
 
 	config := readConfigFile(*configFilePtr)
 
-	db := firestoreDB.New()
+	db := firestoreDB.New(os.Getenv("FIREBASE_PROJECTID"))
 
 	for _, userId := range config.UserIds {
 		recommendationIdsPath, userFeed := getRefs(*entityPtr, userId)
