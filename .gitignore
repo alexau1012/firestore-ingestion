@@ -1,2 +1,2 @@
-config.json
+*.json
 firestore-data-ingestion

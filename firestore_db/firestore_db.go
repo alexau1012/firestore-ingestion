@@ -9,6 +9,7 @@ import (
 	"cloud.google.com/go/firestore"
 	firebase "firebase.google.com/go"
 	"github.com/alexau1012/firestore-data-ingestion/domain"
+	"github.com/alexau1012/firestore-data-ingestion/infrastructure"
 	"google.golang.org/api/iterator"
 )
 
@@ -18,7 +19,7 @@ type FirestoreDB struct {
 	batchSize int
 }
 
-func New() FirestoreDB {
+func New() infrastructure.DocumentDatabase {
 	ctx := context.Background()
 	conf := &firebase.Config{ProjectID: "pcone-xl-fb-dev"}
 
@@ -116,4 +117,8 @@ func (db FirestoreDB) SetDocument(documentName string, value *domain.Recommendat
 	})
 	fmt.Printf("Set document \"%s\"\n", documentName)
 	return err
+}
+
+func (db FirestoreDB) CloseConnection() {
+	db.CloseConn()
 }

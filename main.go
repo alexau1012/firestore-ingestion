@@ -63,7 +63,7 @@ func main() {
 		}
 	}
 
-	defer db.CloseConn()
+	defer db.CloseConnection()
 }
 
 func getRefs(entity string, userId string) (cref string, dref string) {
